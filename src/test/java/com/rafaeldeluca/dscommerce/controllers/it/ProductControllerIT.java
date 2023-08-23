@@ -46,4 +46,20 @@ public class ProductControllerIT {
         resultActions.andExpect(jsonPath("$.content[0].price").value(2190.0));
         resultActions.andExpect(jsonPath("$.content[0].imgUrl").value("https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/2-big.jpg"));
     }
+
+    @Test
+    public void findAllProductsShoudlReturnPageWithAllProductNameIsNotInform () throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(get("/products")
+                .accept(MediaType.APPLICATION_JSON));
+
+        // nesse caso vai ter que retornar o primeiro objeto product da lista paginada
+
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.content[0].id").value(1L));
+        resultActions.andExpect(jsonPath("$.content[0].name").value("The Lord of the Rings"));
+        resultActions.andExpect(jsonPath("$.content[0].price").value(90.5));
+        resultActions.andExpect(jsonPath("$.content[0].imgUrl").value("https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/1-big.jpg"));
+
+    }
 }
