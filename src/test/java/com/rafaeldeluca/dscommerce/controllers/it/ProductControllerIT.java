@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +25,8 @@ public class ProductControllerIT {
     private MockMvc mockMvc;
 
     private String productName;
+
+    private String adminBearerToken;
 
     @BeforeEach
     public void setUp () {
@@ -60,6 +63,18 @@ public class ProductControllerIT {
         resultActions.andExpect(jsonPath("$.content[0].name").value("The Lord of the Rings"));
         resultActions.andExpect(jsonPath("$.content[0].price").value(90.5));
         resultActions.andExpect(jsonPath("$.content[0].imgUrl").value("https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/1-big.jpg"));
+    }
+
+    @Test
+    public void insertProductShoudlReturnProductDTOCreatedWhenUserLoggedAsAdmin () throws Exception {
+
+        String jsonProductBody = "";
+
+        ResultActions resultActions = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .content(jsonProductBody)
+                        .accept(MediaType.APPLICATION_JSON));
 
     }
 }
