@@ -21,21 +21,21 @@ public class TokenUtil {
     private String clientId;
 
     @Value("${security.client-secret}")
-    private String clienteSecret;
+    private String clientSecret;
 
     // method to get access token as a String
     public String obtainsAccessToken(MockMvc mockMvc, String username, String password) throws Exception {
 
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
-        parameters.add("grant-type", "password");
+        parameters.add("grant_type", "password");
         parameters.add("username", username);
         parameters.add("password", password);
 
         ResultActions resultActions = mockMvc
-                .perform(post("/oath2/token")
+                .perform(post("/oauth2/token")
                         .params(parameters)
-                        .with(httpBasic(clientId, clienteSecret))
-                        .accept("aaplication/json;charset=UTF-8"))
+                        .with(httpBasic(clientId, clientSecret))
+                        .accept("application/json;charset=UTF-8"))
                         .andExpect(status().isOk())
                         .andExpect(content().contentType("application/json;charset=UTF-8"));
 
