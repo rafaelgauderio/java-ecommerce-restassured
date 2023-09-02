@@ -115,7 +115,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void insertProductShouldReturnProductUnprocessableEntityAndUserLoggedAsAdminAndNameIsInvalid() throws Exception {
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndNameIsInvalid() throws Exception {
         // try to insert a name with lass than 3 characters
         product.setName("TV");
         productDTO = new ProductDTO(product);
@@ -133,7 +133,7 @@ public class ProductControllerIT {
         // para dados inválidos terá como resposta o erro 422 - Unprocessable entity
     }
     @Test
-    public void insertProductShouldReturnProductUnprocessableEntityAndUserLoggedAsAdminAndNameToLong() throws Exception {
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndNameToLong() throws Exception {
         // try to insert a name with more than 80 characters
         product.setName("Lorem ipsum dolor sit amet. Est unde distinctio est ipsam officiis ut minus repreh");
         productDTO = new ProductDTO(product);
@@ -149,9 +149,8 @@ public class ProductControllerIT {
 
         resultAction.andExpect(status().isUnprocessableEntity());
     }
-
     @Test
-    public void insertProductShouldReturnProductUnprocessableEntityAndUserLoggedAsAdminAndDescriptionIsInvalid() throws Exception {
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndDescriptionIsInvalid() throws Exception {
         // try to insert a name with lass than 10 characters
         product.setDescription("Descricao");
         productDTO = new ProductDTO(product);
@@ -166,5 +165,39 @@ public class ProductControllerIT {
                         .accept(MediaType.APPLICATION_JSON));
 
         resultAction.andExpect(status().isUnprocessableEntity());
+    }
+    @Test
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndPriceIsNegative () throws Exception {
+
+        product.setPrice(-20.0);
+        productDTO = new ProductDTO(product);
+
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .content(jsonProductBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        resultActions.andExpect(status().isUnprocessableEntity());
+    }
+    @Test
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndPriceIsZero () throws Exception {
+
+        product.setPrice(0.0);
+        productDTO = new ProductDTO(product);
+
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .content(jsonProductBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        resultActions.andExpect(status().isUnprocessableEntity());
     }
 }
