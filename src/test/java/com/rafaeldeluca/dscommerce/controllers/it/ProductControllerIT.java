@@ -131,8 +131,24 @@ public class ProductControllerIT {
 
         resultAction.andExpect(status().isUnprocessableEntity()); // erro http 422
         // para dados inválidos terá como resposta o erro 422 - Unprocessable entity
+    }
 
+    @Test
+    public void insertProductShouldReturnProductUnprocessableEntityAndUserLoggedAsAdminAndNameToLong() throws Exception {
+        // try to insert a name with more than 80 characters
+        product.setName("Lorem ipsum dolor sit amet. Est unde distinctio est ipsam officiis ut minus repreh");
+        productDTO = new ProductDTO(product);
 
+        String  jsonProductBody = objectMapper.writeValueAsString(productDTO);
+
+        ResultActions resultAction = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .content(jsonProductBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        resultAction.andExpect(status().isUnprocessableEntity());
     }
 
 
