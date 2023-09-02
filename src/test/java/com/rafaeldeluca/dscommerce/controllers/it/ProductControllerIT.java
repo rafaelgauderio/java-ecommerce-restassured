@@ -235,4 +235,18 @@ public class ProductControllerIT {
         resultActions.andExpect(status().isForbidden()); // http 403
     }
 
+    @Test
+    public void insertProductShouldReturnUnauthorizedWhenUserLoggedWithAnInvalidToken () throws Exception {
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + invalidBearerToken)
+                        .content(jsonProductBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        // deve dar erro 401 - unauthorized -
+        resultActions.andExpect(status().isUnauthorized()); // http 401
+    }
 }
