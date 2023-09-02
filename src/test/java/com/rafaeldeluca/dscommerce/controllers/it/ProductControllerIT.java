@@ -200,4 +200,22 @@ public class ProductControllerIT {
 
         resultActions.andExpect(status().isUnprocessableEntity());
     }
+
+    @Test
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndProductHasNoCategory () throws Exception {
+
+        product.getCategories().clear();
+        productDTO = new ProductDTO(product);
+
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .content(jsonProductBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        resultActions.andExpect(status().isUnprocessableEntity());
+    }
 }
