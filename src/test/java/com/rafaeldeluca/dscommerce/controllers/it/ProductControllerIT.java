@@ -114,4 +114,27 @@ public class ProductControllerIT {
         resultActions.andExpect(jsonPath("$.categories[1].id").value(5l));
     }
 
+    @Test
+    public void insertProductShouldReturnProductUnprocessableEntityAndUserLoggedAsAdminAndNameIsInvalid() throws Exception {
+        // try to insert a name with lass than 3 characters
+        product.setName("TV");
+        productDTO = new ProductDTO(product);
+
+        String  jsonProductBody = objectMapper.writeValueAsString(productDTO);
+
+        ResultActions resultAction = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .content(jsonProductBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        resultAction.andExpect(status().isUnprocessableEntity()); // erro http 422
+        // para dados inválidos terá como resposta o erro 422 - Unprocessable entity
+
+
+    }
+
+
+
 }
