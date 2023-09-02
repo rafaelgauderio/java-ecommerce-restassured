@@ -214,8 +214,25 @@ public class ProductControllerIT {
                         .header("Authorization", "Bearer " + adminBearerToken)
                         .content(jsonProductBody)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON));
+                        .accept(MediaType.APPLICATION_JSON));
 
         resultActions.andExpect(status().isUnprocessableEntity());
     }
+
+    @Test
+    public void insertProductShouldReturnForbiddenWhenUserLoggedAsClient () throws Exception {
+
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post("/products")
+                        .header("Authorization", "Bearer " + clientBearerToken)
+                        .content(jsonProductBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        // deve dar erro 403 - forbidden - logado como cliente apenas consegue consultar produtos e não inserir, atualizar e deletar
+        resultActions.andExpect(status().isForbidden()); // http 403
+    }
+
 }
