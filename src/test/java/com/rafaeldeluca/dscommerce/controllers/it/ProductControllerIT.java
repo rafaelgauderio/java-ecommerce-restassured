@@ -5,12 +5,14 @@ import com.rafaeldeluca.dscommerce.dto.ProductDTO;
 import com.rafaeldeluca.dscommerce.entities.Category;
 import com.rafaeldeluca.dscommerce.entities.Product;
 import com.rafaeldeluca.dscommerce.tests.TokenUtil;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -305,12 +307,23 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void deleteProdcutShouldReturnForbiddenWhenIdProductIdDoesNotExistAndUserLoggedAsClient() throws Exception {
+    public void deleteProductShouldReturnForbiddenWhenIdProductIdDoesNotExistAndUserLoggedAsClient() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete("/products/{id}", nonExistingProductId)
                         .header("Authorization", "Bearer " + clientBearerToken)
                         .accept(MediaType.APPLICATION_JSON));
         // 403 - bad Request
         resultActions.andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void deleteProductShouldReturnUnauthorizedWhenIdProductExistsAndTokenInNotValid () throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete("/products/{id}",existingProductId)
+                        .header("Authorization", "Bearer " + invalidBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        // 401 Unauthorized
+        // quando tenta deletar um produto sem estar logado ou logado com token invalido
+        resultActions.andExpect(status().isUnauthorized());
     }
 }
