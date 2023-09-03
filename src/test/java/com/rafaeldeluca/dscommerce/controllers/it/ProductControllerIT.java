@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,6 +32,8 @@ public class ProductControllerIT {
     private TokenUtil tokenUtil;
     @Autowired
     private ObjectMapper objectMapper;
+
+    private Long existingProductId, nonExistingProductId, dependentProductId;
     private String productName;
     private Product product;
     private ProductDTO productDTO;
@@ -55,6 +56,10 @@ public class ProductControllerIT {
         clientPassword = "123456";
         adminUsername = "rafael@gmail.com";
         adminPassword = "123456";
+
+        existingProductId = 1L;
+        nonExistingProductId = 50L;
+        dependentProductId = 2L;
 
         adminBearerToken = tokenUtil.obtainsAccessToken(mockMvc, adminUsername, adminPassword);
         clientBearerToken = tokenUtil.obtainsAccessToken(mockMvc, clientUsername, clientPassword);
@@ -248,5 +253,16 @@ public class ProductControllerIT {
 
         // deve dar erro 401 - unauthorized -
         resultActions.andExpect(status().isUnauthorized()); // http 401
+    }
+    @Test
+    public void deleteProductShouldReturnNoContentWhenIdExistsAndUseLoggedAsAdmin () throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete("/products/{id}", existingProductId)
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+
+        // 204 no content
+        // se o id do produto existir e não tiver pedido com esse produto
+        resultActions.andExpect(status().isNoContent());
     }
 }
