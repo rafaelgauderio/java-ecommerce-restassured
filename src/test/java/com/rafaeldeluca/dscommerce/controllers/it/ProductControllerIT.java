@@ -126,7 +126,7 @@ public class ProductControllerIT {
         product.setName("TV");
         productDTO = new ProductDTO(product);
 
-        String  jsonProductBody = objectMapper.writeValueAsString(productDTO);
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
 
         ResultActions resultAction = mockMvc
                 .perform(post("/products")
@@ -138,13 +138,14 @@ public class ProductControllerIT {
         resultAction.andExpect(status().isUnprocessableEntity()); // erro http 422
         // para dados inválidos terá como resposta o erro 422 - Unprocessable entity
     }
+
     @Test
     public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndNameToLong() throws Exception {
         // try to insert a name with more than 80 characters
         product.setName("Lorem ipsum dolor sit amet. Est unde distinctio est ipsam officiis ut minus repreh");
         productDTO = new ProductDTO(product);
 
-        String  jsonProductBody = objectMapper.writeValueAsString(productDTO);
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
 
         ResultActions resultAction = mockMvc
                 .perform(post("/products")
@@ -155,13 +156,14 @@ public class ProductControllerIT {
 
         resultAction.andExpect(status().isUnprocessableEntity());
     }
+
     @Test
     public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndDescriptionIsInvalid() throws Exception {
         // try to insert a name with lass than 10 characters
         product.setDescription("Descricao");
         productDTO = new ProductDTO(product);
 
-        String  jsonProductBody = objectMapper.writeValueAsString(productDTO);
+        String jsonProductBody = objectMapper.writeValueAsString(productDTO);
 
         ResultActions resultAction = mockMvc
                 .perform(post("/products")
@@ -172,8 +174,9 @@ public class ProductControllerIT {
 
         resultAction.andExpect(status().isUnprocessableEntity());
     }
+
     @Test
-    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndPriceIsNegative () throws Exception {
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndPriceIsNegative() throws Exception {
 
         product.setPrice(-20.0);
         productDTO = new ProductDTO(product);
@@ -189,8 +192,9 @@ public class ProductControllerIT {
 
         resultActions.andExpect(status().isUnprocessableEntity());
     }
+
     @Test
-    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndPriceIsZero () throws Exception {
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndPriceIsZero() throws Exception {
 
         product.setPrice(0.0);
         productDTO = new ProductDTO(product);
@@ -208,7 +212,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndProductHasNoCategory () throws Exception {
+    public void insertProductShouldReturnUnprocessableEntityWhenUserLoggedAsAdminAndProductHasNoCategory() throws Exception {
 
         product.getCategories().clear();
         productDTO = new ProductDTO(product);
@@ -226,7 +230,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void insertProductShouldReturnForbiddenWhenUserLoggedAsClient () throws Exception {
+    public void insertProductShouldReturnForbiddenWhenUserLoggedAsClient() throws Exception {
 
         String jsonProductBody = objectMapper.writeValueAsString(productDTO);
 
@@ -242,7 +246,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void insertProductShouldReturnUnauthorizedWhenUserLoggedWithAnInvalidToken () throws Exception {
+    public void insertProductShouldReturnUnauthorizedWhenUserLoggedWithAnInvalidToken() throws Exception {
         String jsonProductBody = objectMapper.writeValueAsString(productDTO);
 
         ResultActions resultActions = mockMvc
@@ -255,8 +259,9 @@ public class ProductControllerIT {
         // deve dar erro 401 - unauthorized -
         resultActions.andExpect(status().isUnauthorized()); // http 401
     }
+
     @Test
-    public void deleteProductShouldReturnNoContentWhenIdExistsAndUseLoggedAsAdmin () throws Exception {
+    public void deleteProductShouldReturnNoContentWhenIdExistsAndUseLoggedAsAdmin() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete("/products/{id}", existingProductId)
                         .header("Authorization", "Bearer " + adminBearerToken)
@@ -268,7 +273,7 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void deleteProductShouldReturnNotFoundWhenIdDoesNotExistsAndUseLoggedAsAdmin () throws Exception {
+    public void deleteProductShouldReturnNotFoundWhenIdDoesNotExistsAndUseLoggedAsAdmin() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete("/products/{id}", nonExistingProductId)
                         .header("Authorization", "Bearer " + adminBearerToken)
@@ -279,7 +284,7 @@ public class ProductControllerIT {
 
     @Test
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void deleteProductShouldReturnBadRequestWhenIdDependsOnAOrderAndUseLoggedAsAdmin () throws Exception {
+    public void deleteProductShouldReturnBadRequestWhenIdDependsOnAOrderAndUseLoggedAsAdmin() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete("/products/{id}", dependentProductId)
                         .header("Authorization", "Bearer " + adminBearerToken)
@@ -287,5 +292,25 @@ public class ProductControllerIT {
         // 400 - bad Request
         // ao tentar deletar um product que já tem pedido vinculado
         resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void deleteProdcutShouldReturnForbiddenWhenIdProductIdExistAndUserLoggedAsClient() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete("/products/{id}", existingProductId)
+                        .header("Authorization", "Bearer " + clientBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        // 403 - bad Request
+        resultActions.andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void deleteProdcutShouldReturnForbiddenWhenIdProductIdDoesNotExistAndUserLoggedAsClient() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete("/products/{id}", nonExistingProductId)
+                        .header("Authorization", "Bearer " + clientBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        // 403 - bad Request
+        resultActions.andExpect(status().isForbidden());
     }
 }
