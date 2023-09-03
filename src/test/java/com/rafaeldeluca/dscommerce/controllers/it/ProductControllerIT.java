@@ -265,4 +265,14 @@ public class ProductControllerIT {
         // se o id do produto existir e não tiver pedido com esse produto
         resultActions.andExpect(status().isNoContent());
     }
+
+    @Test
+    public void deleteProductShouldReturnNotFoundWhenIdDoesNotExistsAndUseLoggedAsAdmin () throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete("/products/{id}", nonExistingProductId)
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        // 404 Not Found
+        resultActions.andExpect(status().isNotFound());
+    }
 }
