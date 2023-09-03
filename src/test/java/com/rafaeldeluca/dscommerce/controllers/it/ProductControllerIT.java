@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -59,7 +60,7 @@ public class ProductControllerIT {
 
         existingProductId = 1L;
         nonExistingProductId = 50L;
-        dependentProductId = 2L;
+        dependentProductId = 3L;
 
         adminBearerToken = tokenUtil.obtainsAccessToken(mockMvc, adminUsername, adminPassword);
         clientBearerToken = tokenUtil.obtainsAccessToken(mockMvc, clientUsername, clientPassword);
@@ -274,5 +275,17 @@ public class ProductControllerIT {
                         .accept(MediaType.APPLICATION_JSON));
         // 404 Not Found
         resultActions.andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void deleteProductShouldReturnBadRequestWhenIdDependsOnAOrderAndUseLoggedAsAdmin () throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete("/products/{id}", dependentProductId)
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        // 400 - bad Request
+        // ao tentar deletar um product que já tem pedido vinculado
+        resultActions.andExpect(status().isBadRequest());
     }
 }
