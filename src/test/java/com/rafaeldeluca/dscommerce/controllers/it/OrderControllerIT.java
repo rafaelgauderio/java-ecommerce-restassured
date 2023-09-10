@@ -129,4 +129,25 @@ public class OrderControllerIT {
                         .accept(MediaType.APPLICATION_JSON));
         resultActions.andExpect(status().isForbidden()); // erro 403
     }
+
+    @Test
+    void findByIdShouldReturnNotFoundWhenIdDoesNotExistAndUserLoggedAsClient () throws Exception {
+        // return não encotrado se Id do pedido nao existe
+        // independente se loggado como cliente ou administrador
+        ResultActions resultActions = mockMvc
+                .perform(get("/orders/{id}", nonExistingOrderId)
+                        .header("Authorization", "Bearer " + clientBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(status().isNotFound()); // erro 404
+    }
+
+    @Test
+    void findByIdShouldReturnNotFoundWhenIdDoesNotExistAndUserLoggedAsAdmin () throws Exception {
+        // return não encotrado se Id do pedido nao existe, independente se loggado como cliente ou administrador
+        ResultActions resultActions = mockMvc
+                .perform(get("/orders/{id}", nonExistingOrderId)
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(status().isNotFound()); // erro 404
+    }
 }
