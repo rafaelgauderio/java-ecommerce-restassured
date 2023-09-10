@@ -72,13 +72,26 @@ public class OrderControllerIT {
         product = ProductFactory.createProduct();
         orderItem = new OrderItem(order,product,10, 50.99);
         order.getItems().add(orderItem);
-
-
-
     }
 
     @Test
-    void findByIdShouldReturnOrderDTOWhenIdExistsAndUserLoggedAsAdmin () {
-
+    void findByIdShouldReturnOrderDTOWhenIdExistsAndUserLoggedAsAdmin () throws Exception {
+        // administrador pode consultar pedido de qualquer cliente, codigo http 200
+        ResultActions resultActions = mockMvc
+                .perform(get("/orders/{id}", existingOrderId)
+                        .header("Authorization", "Bearer " + adminBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.id").value(existingOrderId));
+        resultActions.andExpect(jsonPath("$.status").value("DELIVERED"));
+        resultActions.andExpect(jsonPath("$.moment").value("2022-07-29T15:50:00Z"));
+        resultActions.andExpect(jsonPath("$.client").exists());
+        resultActions.andExpect(jsonPath("$.client.name").value("Rafael de Luca"));
+        resultActions.andExpect(jsonPath("$.items").exists());
+        resultActions.andExpect(jsonPath("$.items[0].name").value("Macbook Pro"));
+        resultActions.andExpect(jsonPath("$.items[0].price").value("1250.0"));
+        resultActions.andExpect(jsonPath("$.payment").exists());
+        resultActions.andExpect(jsonPath("$.payment.id").value(2));
+        resultActions.andExpect(jsonPath("$.total").exists());
     }
 }
