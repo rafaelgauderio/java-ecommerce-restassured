@@ -97,7 +97,7 @@ public class OrderControllerIT {
     }
 
     @Test
-    void findByIdShoudlReturnShouldReturnOrderIdWhenIdExistsAndUserLoggedAsClient () throws Exception {
+    void findByIdShouldReturnShouldReturnOrderIdWhenIdExistsAndUserLoggedAsClient () throws Exception {
 
         // o cliente pode consultar seus proprios pedidos
         ResultActions resultActions = mockMvc
@@ -117,5 +117,16 @@ public class OrderControllerIT {
         resultActions.andExpect(jsonPath("$.payment.id").value(1));
         resultActions.andExpect(jsonPath("$.total").exists());
         resultActions.andExpect(jsonPath("$.total").value("1431.0"));
+    }
+    @Test
+    void findByIdShouldReturnShouldReturnForbiddenWhenIdExistsAndUserLoggedAsClientAndOrderBelongsToOtherClient () throws Exception {
+
+        // o cliente não pode consultar ordens do outros clientes (apenas o admim pode consultar qualquer order)
+        // o pedido de Id 2L pertence ao usuário Rafael de Luca
+        ResultActions resultActions = mockMvc
+                .perform(get("/orders/{id}", existingOrderId)
+                        .header("Authorization", "Bearer " + clientBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(status().isForbidden()); // erro 403
     }
 }
