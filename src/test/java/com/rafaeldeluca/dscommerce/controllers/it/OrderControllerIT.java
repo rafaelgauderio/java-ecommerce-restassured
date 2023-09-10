@@ -150,4 +150,22 @@ public class OrderControllerIT {
                         .accept(MediaType.APPLICATION_JSON));
         resultActions.andExpect(status().isNotFound()); // erro 404
     }
+    @Test
+    void findByIdShouldReturnUnauthorizedWheIdExistAndUserNotLogged () throws Exception {
+        // não pode consultar pedido se não estiver logado
+        ResultActions resultActions = mockMvc
+                .perform(get("/orders/{id}", existingOrderId)
+                        .accept(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(status().isUnauthorized()); // erro 401
+    }
+
+    @Test
+    void findByIdShouldReturnUnauthorizedWheIdExistAndTokenIsInvalid () throws Exception {
+        // não pode consultar pedido se o token for inválido
+        ResultActions resultActions = mockMvc
+                .perform(get("/orders/{id}", existingOrderId)
+                        .header("Authorization", "Bearer " + invalidBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(status().isUnauthorized()); // erro 401
+    }
 }
