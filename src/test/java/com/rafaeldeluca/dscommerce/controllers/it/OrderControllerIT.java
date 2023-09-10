@@ -38,7 +38,7 @@ public class OrderControllerIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Long existingOrderId, nonExistingOrderId;
+    private Long existingOrderId, nonExistingOrderId, existingClientOrderId;
     private String productName;
     private Product product;
     private ProductDTO productDTO;
@@ -58,6 +58,7 @@ public class OrderControllerIT {
         adminPassword = "123456";
 
        existingOrderId = 2L;
+       existingClientOrderId = 1L;
        nonExistingOrderId = 500L;
 
 
@@ -93,5 +94,28 @@ public class OrderControllerIT {
         resultActions.andExpect(jsonPath("$.payment").exists());
         resultActions.andExpect(jsonPath("$.payment.id").value(2));
         resultActions.andExpect(jsonPath("$.total").exists());
+    }
+
+    @Test
+    void findByIdShoudlReturnShouldReturnOrderIdWhenIdExistsAndUserLoggedAsClient () throws Exception {
+
+        // o cliente pode consultar seus proprios pedidos
+        ResultActions resultActions = mockMvc
+                .perform(get("/orders/{id}", existingClientOrderId)
+                        .header("Authorization", "Bearer " + clientBearerToken)
+                        .accept(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.id").value(existingClientOrderId));
+        resultActions.andExpect(jsonPath("$.status").value("PAID"));
+        resultActions.andExpect(jsonPath("$.moment").value("2022-07-25T13:00:00Z"));
+        resultActions.andExpect(jsonPath("$.client").exists());
+        resultActions.andExpect(jsonPath("$.client.name").value("Carolina de Luca"));
+        resultActions.andExpect(jsonPath("$.items").exists());
+        resultActions.andExpect(jsonPath("$.items[0].name").value("The Lord of the Rings"));
+        resultActions.andExpect(jsonPath("$.items[0].price").value("90.5"));
+        resultActions.andExpect(jsonPath("$.payment").exists());
+        resultActions.andExpect(jsonPath("$.payment.id").value(1));
+        resultActions.andExpect(jsonPath("$.total").exists());
+        resultActions.andExpect(jsonPath("$.total").value("1431.0"));
     }
 }
